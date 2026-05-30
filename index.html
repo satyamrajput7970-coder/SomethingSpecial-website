@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta chars<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Soundtracks</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(255, 77, 109, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #ff4d6d;
+            font-size: 1.6rem;
+            margin-bottom: 4px;
+        }
+        .header p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* Vinyl Record Player Interaction */
+        .player-display {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 5px auto;
+        }
+
+        .vinyl {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #222 30%, #111 60%, #333 100%);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: spin 4s linear infinite;
+            animation-play-state: paused;
+            transition: transform 0.5s;
+        }
+
+        .vinyl-center {
+            width: 35px;
+            height: 35px;
+            background: #ff4d6d;
+            border-radius: 50%;
+            border: 3px solid #fff;
+        }
+
+        .vinyl.playing {
+            animation-play-state: running;
+        }
+
+        /* Photo Album - Grid Style */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+        }
+
+        .polaroid {
+            background: #fff;
+            padding: 8px;
+            padding-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transform: rotate(var(--rotation));
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 4px;
+        }
+
+        .polaroid:hover {
+            transform: scale(1.08) rotate(0deg);
+            box-shadow: 0 12px 25px rgba(255, 77, 109, 0.25);
+            z-index: 10;
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        /* Romantic Playlist & Audio Handling */
+        .playlist {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .track {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 14px 18px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 4px solid #ff4d6d;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .track:hover {
+            transform: translateX(6px);
+            background: #fff0f3;
+            border-left-color: #ff758f;
+        }
+
+        .track.active-track {
+            background: #ff4d6d;
+            border-left-color: #ff0040;
+        }
+
+        .track.active-track .track-title {
+            color: #fff;
+        }
+
+        .track.active-track .track-artist {
+            color: #ffe5ec;
+        }
+
+        .track.active-track .play-icon {
+            color: #fff;
+        }
+
+        .play-icon {
+            color: #ff4d6d;
+            font-size: 1.3rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .track-info {
+            flex-grow: 1;
+        }
+
+        .track-title {
+            color: #2b2b2b;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .track-artist {
+            color: #777;
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+
+        /* Custom subtle progress bar */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-top: -5px;
+            display: none;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #ff4d6d;
+            transition: width 0.1s linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden Audio element handled by JavaScript -->
+    <audio id="main-audio"></audio>
+
+    <div class="main-card">
+        <div class="header">
+            <h1>Our Romantic Soundtrack</h1>
+            <p>Click a song to play our memories</p>
+        </div>
+
+        <!-- Vinyl Player Display -->
+        <div class="player-display">
+            <div class="vinyl" id="vinyl-record">
+                <div class="vinyl-center"></div>
+            </div>
+        </div>
+
+        <!-- Progress Tracking -->
+        <div class="progress-container" id="progress-area">
+            <div class="progress-bar" id="music-progress"></div>
+        </div>
+
+        <!-- 4 Polaroid Grid -->
+        <div class="photo-grid">
+            <div class="polaroid" style="--rotation: -4deg;">
+                <img src="WhatsApp Image 2026-05-29 at 12.50.04 PM (1).jpeg" alt="Memory 1">
+            </div>
+            <div class="polaroid" style="--rotation: 3deg;">
+                <img src="WhatsApp Image 2026-05-29 at 12.50.04 PM.jpeg" alt="Memory 2">
+            </div>
+            <div class="polaroid" style="--rotation: -2deg;">
+                <img src="WhatsApp Image 2026-05-29 at 12.50.05 PM.jpeg" alt="Memory 3">
+            </div>
+            <div class="polaroid" style="--rotation: 5deg;">
+                <img src="WhatsApp Image 2026-05-29 at 12.51.05 PM.jpeg" alt="Memory 4">
+            </div>
+        </div>
+
+        <!-- Interactive Playlist -->
+        <div class="playlist">
+            <!-- Song 1 -->
+            <div class="track" onclick="playSong('song1.mp3', this)">
+                <span class="play-icon" id="icon-1">▶</span>
+                <div class="track-info">
+                    <div class="track-title">Come Take Your Seat In Your Fantasy</div>
+                    <div class="track-artist">Because you shine the brightest</div>
+                </div>
+            </div>
+
+            <!-- Song 2 -->
+            <div class="track" onclick="playSong('연준 (YEONJUN) ‘Ghost Girl’ Official MV.mp3', this)">
+                <span class="play-icon" id="icon-2">▶</span>
+                <div class="track-info">
+                    <div class="track-title">My Ghost Girl</div>
+                    <div class="track-artist">Just always stay around me...even I dont want like a ghost</div>
+                </div>
+            </div>
+
+            <!--song 3-->
+            <div class="track" onclick="playSong('song3.mp3',this)">
+                <span class="play-icon" id="icon-2">▶</span>
+                <div class="track-info">
+                    <div class="track-title">You Are My Sahiba..</div>
+                    <div class="track-artist">My absolute favorite view is you</div>
+                </div>
+            </div>
+
+            <!-- Song 4-->
+            <div class="track" onclick="playSong('唯一的偏爱.mp3', this)">
+                <span class="play-icon" id="icon-3">▶</span>
+                <div class="track-info">
+                    <div class="track-title">I love You SOoo Much MY Stupid Girl</div>
+                    <div class="track-artist">Your smile makes everything better</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('main-audio');
+        const vinyl = document.getElementById('vinyl-record');
+        const progressContainer = document.getElementById('progress-area');
+        const progressBar = document.getElementById('music-progress');
+        let currentTrackElement = null;
+
+        function playSong(audioSrc, element) {
+            // If clicking the currently playing song, pause it
+            if (currentTrackElement === element) {
+                if (!audio.paused) {
+                    audio.pause();
+                    vinyl.style.animationPlayState = 'paused';
+                    element.querySelector('.play-icon').innerText = '▶';
+                } else {
+                    audio.play();
+                    vinyl.style.animationPlayState = 'running';
+                    element.querySelector('.play-icon').innerText = '⏸';
+                }
+                return;
+            }
+
+            // Reset previous track layout if any
+            if (currentTrackElement) {
+                currentTrackElement.classList.remove('active-track');
+                currentTrackElement.querySelector('.play-icon').innerText = '▶';
+            }
+
+            // Set up new track
+            currentTrackElement = element;
+            element.classList.add('active-track');
+            element.querySelector('.play-icon').innerText = '⏸';
+            
+            audio.src = audioSrc;
+            audio.play().catch(error => {
+                alert("Make sure your audio file name matches exactly in the folder!");
+            });
+
+            // Show progress elements and turn vinyl
+            progressContainer.style.display = 'block';
+            vinyl.classList.add('playing');
+            vinyl.style.animationPlayState = 'running';
+        }
+
+        // Live updating progress bar
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const percentage = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = percentage + '%';
+            }
+        });
+
+        // When song ends naturally
+        audio.addEventListener('ended', () => {
+            vinyl.style.animationPlayState = 'paused';
+            if (currentTrackElement) {
+                currentTrackElement.querySelector('.play-icon').innerText = '▶';
+                currentTrackElement.classList.remove('active-track');
+            }
+            progressBar.style.width = '0%';
+        });
+    </script>
+</body>
+</html>
+
